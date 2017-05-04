@@ -2,7 +2,7 @@
 COPYRIGHT 2017 - LOREN HOWARD
 */
 
-(function() {
+//(function() {
   var strType = 2;
 
   var GRID_SIZE = 300,
@@ -19,11 +19,39 @@ COPYRIGHT 2017 - LOREN HOWARD
       RE_3 = /^([A-Za-z])([1-9]|1[0-9])(?:\s+(\d)(\d)?)?$/,
       RE_4 = /^([A-Za-z])([1-9]|1[0-9])(?:\s+(\d)(?:\s+(\d))?)?$/,
 
+      C = [
+        1611.342362585303,
+        -0.780011423446922,
+        0.0036687139521660583,
+        -0.000016450984941129843,
+        3.7604744170742065e-8,
+        -4.596546039859563e-11,
+        2.847194494843758e-14,
+        -7.04244419393223e-18
+      ],
+
+      PR = Math.PI * 180,
+
       EX1 = 'A1-KP1-1',
       EX2 = 'A1K11',
       EX3 = 'A1 1 1',
       EX4 = 'A1 11'
   ;
+
+  var milradian = function(d) {
+    return (
+      C.map(function(c,i) {
+        return c*Math.pow(d,i);
+      })
+      .reduce(function(a,c) {
+        return a+c;
+      })
+    );
+  };
+
+  var heading = function(p1,p2) {
+    return (Math.atan2(p2[1]-p1[1], p2[0]-p1[0]) * (180/Math.PI) + 360) % 360;
+  };
 
   var strs = function(str, re) {
     return str.match(re).slice(1);
@@ -91,10 +119,7 @@ COPYRIGHT 2017 - LOREN HOWARD
     return [gridX*GRID_SIZE, gridY*GRID_SIZE, err*GRID_SIZE];
   }
 
-  function dist(str1, str2) {
-    var pos1 = pos(str1);
-    var pos2 = pos(str2);
-    
+  function dist(pos1, pos2) {
     var x1 = pos1[0],
         y1 = pos1[1],
         e1 = pos1[2],
@@ -118,17 +143,29 @@ COPYRIGHT 2017 - LOREN HOWARD
   var update = function() {
     try {
       var v1 = i1el.value,
-           v2 = i2el.value
+          v2 = i2el.value
+      ;
+     
+      var pos1 = pos(v1),
+          pos2 = pos(v2)
+      ;
+
+      var distErr = dist(pos1,pos2),
+          distance = distErr[0],
+          err = distErr[1],
+          distStr = distance.toFixed(PRECISION),
+          errStr = '(+/- ' + err.toFixed(PRECISION) + ')',
+          milrad = parseInt(milradian(distance)),
+          head = parseInt(heading(pos1, pos2))
       ;
       
-      var distErr = dist(v1,v2),
-          distStr = distErr[0].toFixed(PRECISION),
-          errStr = '(+/- ' + distErr[1].toFixed(PRECISION) + ')'
+      var line1 = distStr + ' ' + errStr + ' meters',
+          line2 = 'Milliradian: ' + milrad + ', Compass: ' + head
       ;
-      
-      oel.textContent =  distStr + ' ' + errStr + ' meters';
+
+      oel.innerHTML = line1 + '<br>' + line2;
     } catch(_) {
-      oel.textContent = '\u00A0';
+      oel.innerHTML = '&nbsp;<br>&nbsp;';
     }
   };
 
@@ -169,4 +206,4 @@ COPYRIGHT 2017 - LOREN HOWARD
   sel.addEventListener('change', slistener);
 
   updateph();
-})();
+//})();

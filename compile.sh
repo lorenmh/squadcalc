@@ -1,1 +1,1 @@
-uglifyjs app.js -o app.min.js -b ascii-only=true --mangle --compress
+uglifyjs app.js -o static/app.min.js -b ascii-only=true --mangle --compress
