@@ -45,6 +45,11 @@ input, select {
   padding: 10px;
   background-color: rgba(0,0,0,.05);
   margin-top: 0;
+  line-height: 16px;
+}
+
+#output span {
+  font-size: 13px;
 }
 
 h3 {

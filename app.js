@@ -140,6 +140,10 @@ COPYRIGHT 2017 - LOREN HOWARD
       oel = document.getElementById('output')
   ;
 
+  var minMaxStr = function(m0,m1) {
+    return '(min: ' + m0 + ', max: ' + m1 + ')';
+  };
+
   var update = function() {
     try {
       var v1 = i1el.value,
@@ -154,18 +158,36 @@ COPYRIGHT 2017 - LOREN HOWARD
           distance = distErr[0],
           err = distErr[1],
           distStr = distance.toFixed(PRECISION),
-          errStr = '(+/- ' + err.toFixed(PRECISION) + ')',
+          dist0 = distance-err,
+          dist1 = distance+err,
+          dist0s = dist0.toFixed(PRECISION),
+          dist1s = dist1.toFixed(PRECISION),
+          milrad0 = parseInt(milradian(dist1)),
           milrad = parseInt(milradian(distance)),
-          head = parseInt(heading(pos1, pos2))
-      ;
-      
-      var line1 = distStr + ' ' + errStr + ' meters',
-          line2 = 'Milliradian: ' + milrad + ', Compass: ' + head
+          milrad1 = parseInt(milradian(dist0)),
+          headA = parseInt(heading(pos1,[pos2[0]+err, pos2[1]+err])),
+          head = parseInt(heading(pos1, pos2)),
+          headB = parseInt(heading([pos1[0]+err, pos1[1]+err],pos2)),
+          head0,head1
       ;
 
-      oel.innerHTML = line1 + '<br>' + line2;
+      if (headA<headB) {
+        head0=headA;
+        head1=headB;
+      } else {
+        head0=headB;
+        head1=headA;
+      }
+
+      
+      var line1 = 'Distance: <strong>' + distStr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
+          line2 = 'Milliradian: <strong>' + milrad + '</strong> <span>' + minMaxStr(milrad0,milrad1) + '</span>',
+          line3 = 'Compass: <strong>' + head + ' degrees</strong> <span>' + minMaxStr(head0,head1) + '</span>'
+      ;
+
+      oel.innerHTML = line1 + '<br>' + line2 + '<br>' + line3;
     } catch(_) {
-      oel.innerHTML = '&nbsp;<br>&nbsp;';
+      oel.innerHTML = '&nbsp;<br>&nbsp;<br>&nbsp;';
     }
   };
 
