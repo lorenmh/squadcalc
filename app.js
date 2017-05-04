@@ -11,9 +11,9 @@ COPYRIGHT 2017 - LOREN HOWARD
       PRECISION = 1,
 
       KP_MAP = [
-        [0,0],[1,0],[2,0],
-        [0,1],[1,1],[2,1],
         [0,2],[1,2],[2,2],
+        [0,1],[1,1],[2,1],
+        [0,0],[1,0],[2,0],
       ],
 
       RE_1 = /^([A-Za-z])([1-9]|1[0-9])(?:\-[Kk][Pp]?(\d)(?:\-(\d))?)?$/,
@@ -33,7 +33,6 @@ COPYRIGHT 2017 - LOREN HOWARD
       ],
 
       DR = 180/Math.PI,
-      P2 = Math.PI*2,
 
       EX1 = 'A1-KP1-1',
       EX2 = 'A1K11',
@@ -83,6 +82,7 @@ COPYRIGHT 2017 - LOREN HOWARD
     if (x2<=x1 && y2<y1) {
       return (180-Math.abs(deg))+270;
     }
+    //if (x2
   };
 
   var strs = function(str, re) {
