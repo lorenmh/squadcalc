@@ -7,6 +7,7 @@ COPYRIGHT 2017 - LOREN HOWARD
 
   var GRID_SIZE = 300,
       MAX_DIST = 1350,
+      MAX_MIL = 1600,
       PRECISION = 1,
 
       KP_MAP = [
@@ -31,7 +32,7 @@ COPYRIGHT 2017 - LOREN HOWARD
         -7.04244419393223e-18
       ],
 
-      PR = Math.PI * 180,
+      DR = 180/Math.PI,
 
       EX1 = 'A1-KP1-1',
       EX2 = 'A1K11',
@@ -51,7 +52,7 @@ COPYRIGHT 2017 - LOREN HOWARD
   };
 
   var heading = function(p1,p2) {
-    return (Math.atan2(p2[1]-p1[1], p2[0]-p1[0]) * (180/Math.PI) + 360) % 360;
+    return (Math.atan2(p2[1]-p1[1], p2[0]-p1[0]) * DR + 450) % 360;
   };
 
   var strs = function(str, re) {
@@ -167,23 +168,25 @@ COPYRIGHT 2017 - LOREN HOWARD
           milrad0 = parseInt(milradian(dist1)),
           milrad = parseInt(milradian(distance)),
           milrad1 = parseInt(milradian(dist0)),
-          headA = parseInt(heading(pos1,[pos2[0]+err, pos2[1]+err])),
+          headA = parseInt(heading([pos1[0],pos1[1]-err],[pos2[0]+err,pos2[1]])),
           head = parseInt(heading(pos1, pos2)),
-          headB = parseInt(heading([pos1[0]+err, pos1[1]+err],pos2)),
+          headB = parseInt(heading([pos1[0]+err,pos1[1]],[pos2[0],pos2[1]-err])),
           head0,head1
       ;
 
 
-      if (headA<headB) {
+      //if (head>=180) {
         head0=headA;
         head1=headB;
-      } else {
-        head0=headB;
-        head1=headA;
-      }
+      //} else {
+      //  head0=headB;
+      //  head1=headA;
+      //}
 
       var ms;
-      if (milrad < MAX_DIST && milrad > 0) {
+      if (distance < MAX_DIST && milrad > 0) {
+        milrad1 = milrad1 < MAX_MIL ? milrad1 : MAX_MIL;
+        milrad = milrad < MAX_MIL ? milrad : MAX_MIL;
         ms = milrad + '</strong> <span>' + minMaxStr(milrad0,milrad1) + '</span>';
       } else {
         ms = 'Out of Range</strong>';
@@ -191,7 +194,7 @@ COPYRIGHT 2017 - LOREN HOWARD
       
       var line1 = 'Distance: <strong>' + distStr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
           line2 = 'Milliradian: <strong>' + ms,
-          line3 = 'Compass: <strong>' + head + ' degrees</strong> <span>' + minMaxStr(head0,head1) + '</span>'
+          line3 = 'Bearing: <strong>' + head + ' degrees</strong>'// <span>' + minMaxStr(head0,head1) + '</span>'
       ;
 
       oel.innerHTML = line1 + '<br>' + line2 + '<br>' + line3;
