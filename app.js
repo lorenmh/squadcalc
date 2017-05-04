@@ -2,7 +2,7 @@
 COPYRIGHT 2017 - LOREN HOWARD
 */
 
-(function() {
+//(function() {
   var strType = 2;
 
   var GRID_SIZE = 300,
@@ -33,6 +33,7 @@ COPYRIGHT 2017 - LOREN HOWARD
       ],
 
       DR = 180/Math.PI,
+      P2 = Math.PI*2,
 
       EX1 = 'A1-KP1-1',
       EX2 = 'A1K11',
@@ -52,7 +53,30 @@ COPYRIGHT 2017 - LOREN HOWARD
   };
 
   var heading = function(p1,p2) {
-    return (Math.atan2(p2[1]-p1[1], p2[0]-p1[0]) * DR + 450) % 360;
+    var x1 = p1[0],
+        y1 = p1[1],
+        x2 = p2[0],
+        y2 = p2[1],
+        dx = x1-x2,
+        dy = y1-y2,
+        m = Math.hypot(dx,dy),
+        ux = dx / m,
+        uy = dy / m,
+        rad = Math.atan2(uy, ux),
+        deg = rad * DR
+    ;
+
+    //return [rad, deg];
+
+    //q1
+    if (x2>=x1 && y2>y1) return 90-deg;
+    //q2
+    if (x2>x1 && y2<=y1) return 360-(90+deg);
+    //q3
+    if (x2<=x1 && y2<y1) return 270-(180+deg);
+    //q4
+    if (x2<x1 && y2>=y1) return 270-deg;
+    //if (x2
   };
 
   var strs = function(str, re) {
@@ -240,4 +264,4 @@ COPYRIGHT 2017 - LOREN HOWARD
   sel.addEventListener('change', slistener);
 
   updateph();
-})();
+//})();
