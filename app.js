@@ -6,6 +6,7 @@ COPYRIGHT 2017 - LOREN HOWARD
   var strType = 2;
 
   var GRID_SIZE = 300,
+      MAX_DIST = 1350,
       PRECISION = 1,
 
       KP_MAP = [
@@ -141,6 +142,7 @@ COPYRIGHT 2017 - LOREN HOWARD
   ;
 
   var minMaxStr = function(m0,m1) {
+    m0 = m0 > 0 ? m0 : 0;
     return '(min: ' + m0 + ', max: ' + m1 + ')';
   };
 
@@ -171,6 +173,7 @@ COPYRIGHT 2017 - LOREN HOWARD
           head0,head1
       ;
 
+
       if (headA<headB) {
         head0=headA;
         head1=headB;
@@ -179,9 +182,15 @@ COPYRIGHT 2017 - LOREN HOWARD
         head1=headA;
       }
 
+      var ms;
+      if (milrad < MAX_DIST && milrad > 0) {
+        ms = milrad + '</strong> <span>' + minMaxStr(milrad0,milrad1) + '</span>';
+      } else {
+        ms = 'Out of Range</strong>';
+      }
       
       var line1 = 'Distance: <strong>' + distStr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
-          line2 = 'Milliradian: <strong>' + milrad + '</strong> <span>' + minMaxStr(milrad0,milrad1) + '</span>',
+          line2 = 'Milliradian: <strong>' + ms,
           line3 = 'Compass: <strong>' + head + ' degrees</strong> <span>' + minMaxStr(head0,head1) + '</span>'
       ;
 
