@@ -2,7 +2,7 @@
 COPYRIGHT 2017 - LOREN HOWARD
 */
 
-//(function() {
+(function() {
   var strType = 2;
 
   var GRID_SIZE = 300,
@@ -57,8 +57,8 @@ COPYRIGHT 2017 - LOREN HOWARD
         y1 = p1[1],
         x2 = p2[0],
         y2 = p2[1],
-        dx = x1-x2,
-        dy = y1-y2,
+        dx = x2-x1,
+        dy = y2-y1,
         m = Math.hypot(dx,dy),
         ux = dx / m,
         uy = dy / m,
@@ -66,17 +66,23 @@ COPYRIGHT 2017 - LOREN HOWARD
         deg = rad * DR
     ;
 
-    //return [rad, deg];
+    if (ux === 0 && uy === 1) { return 180; }
 
-    //q1
-    if (x2>=x1 && y2>y1) return 90-deg;
-    //q2
-    if (x2>x1 && y2<=y1) return 360-(90+deg);
-    //q3
-    if (x2<=x1 && y2<y1) return 270-(180+deg);
-    //q4
-    if (x2<x1 && y2>=y1) return 270-deg;
-    //if (x2
+    if (x2>x1 && y2>=y1) {
+      return deg+90;
+    }
+    //w
+    if (x2>=x1 && y2<y1) {
+      return deg+90;
+    }
+    //w
+    if (x2<x1 && y2>=y1) {
+      return deg+90;
+    }
+    //w
+    if (x2<=x1 && y2<y1) {
+      return (180-Math.abs(deg))+270;
+    }
   };
 
   var strs = function(str, re) {
@@ -192,16 +198,16 @@ COPYRIGHT 2017 - LOREN HOWARD
           milrad0 = parseInt(milradian(dist1)),
           milrad = parseInt(milradian(distance)),
           milrad1 = parseInt(milradian(dist0)),
-          headA = parseInt(heading([pos1[0],pos1[1]-err],[pos2[0]+err,pos2[1]])),
+          //headA = parseInt(heading([pos1[0],pos1[1]-err],[pos2[0]+err,pos2[1]])),
           head = distance ? parseInt(heading(pos1, pos2)) : 0,
-          headB = parseInt(heading([pos1[0]+err,pos1[1]],[pos2[0],pos2[1]-err])),
+          //headB = parseInt(heading([pos1[0]+err,pos1[1]],[pos2[0],pos2[1]-err])),
           head0,head1
       ;
 
 
       //if (head>=180) {
-        head0=headA;
-        head1=headB;
+        //head0=headA;
+        //head1=headB;
       //} else {
       //  head0=headB;
       //  head1=headA;
@@ -264,4 +270,4 @@ COPYRIGHT 2017 - LOREN HOWARD
   sel.addEventListener('change', slistener);
 
   updateph();
-//})();
+})();
