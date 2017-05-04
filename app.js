@@ -36,8 +36,8 @@ COPYRIGHT 2017 - LOREN HOWARD
 
       EX1 = 'A1-KP1-1',
       EX2 = 'A1K11',
-      EX3 = 'A1 1 1',
-      EX4 = 'A1 11'
+      EX3 = 'A1 11',
+      EX4 = 'A1 1 1'
   ;
 
   var milradian = function(d) {
