@@ -169,7 +169,7 @@ COPYRIGHT 2017 - LOREN HOWARD
           milrad = parseInt(milradian(distance)),
           milrad1 = parseInt(milradian(dist0)),
           headA = parseInt(heading([pos1[0],pos1[1]-err],[pos2[0]+err,pos2[1]])),
-          head = parseInt(heading(pos1, pos2)),
+          head = distance ? parseInt(heading(pos1, pos2)) : 0,
           headB = parseInt(heading([pos1[0]+err,pos1[1]],[pos2[0],pos2[1]-err])),
           head0,head1
       ;
