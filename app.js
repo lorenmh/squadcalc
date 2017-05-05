@@ -16,10 +16,12 @@ COPYRIGHT 2017 - LOREN HOWARD
         [0,0],[1,0],[2,0],
       ],
 
-      RE_1 = /^([A-Za-z])([1-9]|1[0-9])(?:\-[Kk][Pp]?(\d)(?:\-(\d))?)?$/,
-      RE_2 = /^([A-Za-z])([1-9]|1[0-9])(?:(?:[Kk][Pp]?)?(\d)(\d)?)?$/,
-      RE_3 = /^([A-Za-z])([1-9]|1[0-9])(?:\s+(\d)(?:\s+(\d))?)?$/,
-      RE_4 = /^([A-Za-z])([1-9]|1[0-9])(?:\s+(\d)(\d)?)?$/,
+      RE_1 = /^([A-Za-z])([1-9])((?:\-(?:[Kk][Pp]?)?[1-9])*)(?:\-(?:[Kk][Pp]?)?)?$/,
+      RE_2 = /^([A-Za-z])([1-9])((?:(?:[Kk][Pp]?)?[1-9])*)(?:[Kk][Pp]?)?$/,
+      RE_3 = /^([A-Za-z])([1-9])\s+((?:[1-9])*)(?:\s+)?$/,
+      RE_4 = /^([A-Za-z])([1-9])((?:\s+[1-9])*)(?:\s+)?$/,
+
+      REPLACE_RE = /[^1-9]/g,
 
       MIN_ATOM = {},
       MAX_ATOM = {},
@@ -165,7 +167,8 @@ COPYRIGHT 2017 - LOREN HOWARD
     ;
 
     // in this case the err > the dx, which means p1 is within p2, vice versa
-    if (Math.hypot(dx,p2[2]) > Math.hypot(dx,dy)) { return null; }
+    if (Math.hypot(p1[2],p1[2]) > Math.hypot(dx,dy) ||
+        Math.hypot(p2[2],p2[2]) > Math.hypot(dx,dy)) { return null; }
 
     var c;
     if (dx===0 && dy<0)       { c=1; w = [[br(p1), bl(p2)], [bl(p1), br(p2)]]; }
@@ -204,48 +207,50 @@ COPYRIGHT 2017 - LOREN HOWARD
         break;
     }
     
-    var posStrs = strs(str, re);
-    
-    var isKp = true,
-        isKps = true
+    var pstrs = strs(str, re),
+        gxs = pstrs[0],
+        gys = pstrs[1],
+        kps = pstrs[2]
     ;
     
-    if (posStrs[3] === undefined) {
-      isKps = false;
-      if (posStrs[2] === undefined) {
-        isKp = false;
-      }
-    }
-    
-    var gridXCoord = parseInt(posStrs[0],36)-10,
-        gridYCoord = parseInt(posStrs[1])-1,
-        kpCoord = parseInt(posStrs[2])-1,
-        kpsCoord = parseInt(posStrs[3])-1
-     ;
-    
-    var kpXComponent = isKp ? (KP_MAP[kpCoord][0])/3 : 0,
-        kpYComponent = isKp ? (KP_MAP[kpCoord][1])/3 : 0,
-        kpsXComponent = isKps ? (KP_MAP[kpsCoord][0])/9 : 0,
-        kpsYComponent = isKps ? (KP_MAP[kpsCoord][1])/9 : 0
-    ;
-        
-    var gridX = gridXCoord + kpXComponent + kpsXComponent,
-        gridY = gridYCoord + kpYComponent + kpsYComponent
+    console.log(kps);
+    var gx = parseInt(gxs,36)-10,
+        gy = parseInt(gys)-1,
+        kp = !kps ? [] : (
+          kps
+            .replace(REPLACE_RE, '')
+            .split('')
+            .map(function(ks){ return parseInt(ks); })
+            .map(function(k){ return [KP_MAP[k][0], KP_MAP[k][1]]; })
+            .map(function(k,i) {
+              var e = Math.pow(1/3,i+1);
+              return [k[0]*e, k[1]*e];
+            })
+        )
     ;
 
-    var err = 0;
-    
-    if (!isKp && !isKps) {
-      err = 1;
-    } else if (!isKps) {
-      err = (1/3);
+    console.log(kp);
+
+    var kpxa, kpya, kpx, kpy;
+    if (kp.length) {
+      kpxa = kp.map(function(k){ return k[0]; });
+      kpya = kp.map(function(k){ return k[1]; });
+      kpx = kpxa.reduce(function(a,c){ return a+c; });
+      kpy = kpya.reduce(function(a,c){ return a+c; });
     } else {
-      err = (1/9);
+      kpx = 0;
+      kpy = 0;
     }
 
     
+    var px = gx + kpx,
+        py = gy + kpy
+    ;
 
-    return [gridX*GRID_SIZE, gridY*GRID_SIZE, err*GRID_SIZE];
+    var err = Math.pow((1/3), kp.length);
+    console.log(err);
+    
+    return [px*GRID_SIZE, py*GRID_SIZE, err*GRID_SIZE];
   }
 
   function dist(pos1, pos2) {
@@ -328,8 +333,8 @@ COPYRIGHT 2017 - LOREN HOWARD
 
       var bs;
       if (berr) {
-        berr[0] = Math.round(berr[0]) % 360;
-        berr[1] = Math.round(berr[1]) % 360;
+        berr[0] = Math.floor(berr[0]) % 360;
+        berr[1] = Math.ceil(berr[1]) % 360;
 
         bs = head + ' degrees</strong> <span>' + minMaxStr(berr[0],berr[1]) + '</span>';
       } else {

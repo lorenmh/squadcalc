@@ -4,6 +4,9 @@
 
 pre {
   display: inline;
+      background-color: rgb(240,240,240);
+          padding: 1px 5px;
+              border-radius: 2px;
 }
 
 body {
