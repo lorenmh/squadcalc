@@ -7,7 +7,7 @@ COPYRIGHT 2017 - LOREN HOWARD
 
   var GRID_SIZE = 300,
       MAX_DIST = 1350,
-      MAX_MIL = 1600,
+      MAX_MIL = 1570,
       PRECISION = 1,
 
       KP_MAP = [
@@ -21,15 +21,39 @@ COPYRIGHT 2017 - LOREN HOWARD
       RE_3 = /^([A-Za-z])([1-9]|1[0-9])(?:\s+(\d)(\d)?)?$/,
       RE_4 = /^([A-Za-z])([1-9]|1[0-9])(?:\s+(\d)(?:\s+(\d))?)?$/,
 
+      MIN_ATOM = {},
+      MAX_ATOM = {},
+      MIN_X = 50,
+      MAX_X = 1250,
+      MIN_Y = 1579,
+      MAX_Y = 800,
+
       C = [
-        1611.342362585303,
-        -0.780011423446922,
-        0.0036687139521660583,
-        -0.000016450984941129843,
-        3.7604744170742065e-8,
-        -4.596546039859563e-11,
-        2.847194494843758e-14,
-        -7.04244419393223e-18
+        [50, 1579],
+        [100, 1558],
+        [150, 1538],
+        [200, 1517],
+        [250, 1496],
+        [300, 1475],
+        [350, 1453],
+        [400, 1431],
+        [450, 1409],
+        [500, 1387],
+        [550, 1364],
+        [600, 1341],
+        [650, 1317],
+        [700, 1292],
+        [750, 1267],
+        [800, 1240],
+        [850, 1212],
+        [900, 1183],
+        [950, 1152],
+        [1000, 1118],
+        [1050, 1081],
+        [1100, 1039],
+        [1150, 988],
+        [1200, 918],
+        [1250, 800]
       ],
 
       DR = 180/Math.PI,
@@ -39,6 +63,38 @@ COPYRIGHT 2017 - LOREN HOWARD
       EX3 = 'A1 11',
       EX4 = 'A1 1 1'
   ;
+
+  var interpolator = function(d) {
+    if (d < MIN_X) {
+      return MIN_ATOM;
+    } else if (d > MAX_X) {
+      return MAX_ATOM;
+    }
+    var i, c, n, cx, cy, nx, ny, vx, vy, dx;
+    for (i=0; i<C.length; i++) {
+      c = C[i];
+      n = C[i+1];
+      cx = c[0];
+      cy = c[1];
+
+      if (d === cx) {
+        return cy;
+      }
+
+      nx = n[0];
+
+      if (nx <= d) { continue; }
+
+      ny = n[1];
+
+      vx = nx-cx;
+      vy = ny-cy;
+
+      dx = d-cx;
+
+      return Math.round((vy/vx)*dx+cy);
+    }
+  };
 
   var milradian = function(d) {
     return (
@@ -173,7 +229,10 @@ COPYRIGHT 2017 - LOREN HOWARD
   ;
 
   var minMaxStr = function(m0,m1) {
-    m0 = m0 > 0 ? m0 : 0;
+    m0 = m0 === MAX_ATOM ? MAX_Y : m0;
+    m1 = m1 === MIN_ATOM ? MIN_Y : m1;
+    m0 = m0 < 0 ? 0 : m0;
+
     return '(min: ' + m0 + ', max: ' + m1 + ')';
   };
 
@@ -195,9 +254,11 @@ COPYRIGHT 2017 - LOREN HOWARD
           dist1 = distance+err,
           dist0s = dist0.toFixed(PRECISION),
           dist1s = dist1.toFixed(PRECISION),
-          milrad0 = parseInt(milradian(dist1)),
-          milrad = parseInt(milradian(distance)),
-          milrad1 = parseInt(milradian(dist0)),
+
+          milrad0 = interpolator(dist1),
+          milrad = interpolator(distance),
+          milrad1 = interpolator(dist0),
+
           //headA = parseInt(heading([pos1[0],pos1[1]-err],[pos2[0]+err,pos2[1]])),
           head = distance ? parseInt(heading(pos1, pos2)) : 0,
           //headB = parseInt(heading([pos1[0]+err,pos1[1]],[pos2[0],pos2[1]-err])),
@@ -214,12 +275,14 @@ COPYRIGHT 2017 - LOREN HOWARD
       //}
 
       var ms;
-      if (distance < MAX_DIST && milrad > 0) {
-        milrad1 = milrad1 < MAX_MIL ? milrad1 : MAX_MIL;
-        milrad = milrad < MAX_MIL ? milrad : MAX_MIL;
+      if (milrad !== MIN_ATOM && milrad !== MAX_ATOM) {
         ms = milrad + '</strong> <span>' + minMaxStr(milrad0,milrad1) + '</span>';
       } else {
-        ms = 'Out of Range</strong>';
+        if (milrad === MAX_ATOM) {
+          ms = 'Out of Range</strong>';
+        } else {
+          ms = 'Too Close</strong>';
+        }
       }
       
       var line1 = 'Distance: <strong>' + distStr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
