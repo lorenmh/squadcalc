@@ -338,7 +338,7 @@ COPYRIGHT 2017 - LOREN HOWARD
 
         bs = head + ' degrees</strong> <span>' + minMaxStr(berr[0],berr[1]) + '</span>';
       } else {
-        bs = head + ' degrees</strong> (high error)';
+        bs = head + ' degrees</strong> <span>(high error)</span>';
       }
       
       var line1 = 'Distance: <strong>' + distStr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
