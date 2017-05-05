@@ -141,6 +141,47 @@ COPYRIGHT 2017 - LOREN HOWARD
     //if (x2
   };
 
+  var tl = function(p) {
+    return [p[0], p[1]];
+  };
+
+  var tr = function(p) {
+    return [p[0]+p[2], p[1]];
+  };
+
+  var br = function(p) {
+    return [p[0]+p[2], p[1]+p[2]];
+  };
+
+  var bl = function(p) {
+    return [p[0], p[1]+p[2]];
+  };
+
+
+  var bearingwc = function(p1,p2) {
+    var dx = p2[0]-p1[0],
+        dy = p2[1]-p1[1],
+        w // worst
+    ;
+
+    // in this case the err > the dx, which means p1 is within p2, vice versa
+    if (Math.hypot(dx,p2[2]) > Math.hypot(dx,dy)) { return null; }
+
+    var c;
+    if (dx===0 && dy<0)       { c=1; w = [[br(p1), bl(p2)], [bl(p1), br(p2)]]; }
+    else if (dx>0 && dy<0)    { c=2; w = [[br(p1), tl(p2)], [tl(p1), br(p2)]]; }
+    else if (dx>0 && dy===0)  { c=3; w = [[bl(p1), tl(p2)], [tl(p1), bl(p2)]]; }
+    else if (dx>0 && dy>0)    { c=4; w = [[bl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
+    else if (dx===0 && dy>0)  { c=5; w = [[tl(p1), tr(p2)], [tr(p1), tl(p2)]]; }
+    else if (dx<0 && dy>0)    { c=6; w = [[tl(p1), br(p2)], [br(p1), tl(p2)]]; }
+    else if (dx<0 && dy===0)  { c=7; w = [[tr(p1), br(p2)], [br(p1), tr(p2)]]; }
+    else                      { c=8; w = [[tr(p1), bl(p2)], [bl(p1), tr(p2)]]; }
+    //console.log(dx,dy, c, ''+w);
+
+    return [heading(w[0][0], w[0][1]), heading(w[1][0], w[1][1])];
+  };
+
+
   var strs = function(str, re) {
     return str.match(re).slice(1);
    };
@@ -262,9 +303,9 @@ COPYRIGHT 2017 - LOREN HOWARD
           //headA = parseInt(heading([pos1[0],pos1[1]-err],[pos2[0]+err,pos2[1]])),
           head = distance ? parseInt(heading(pos1, pos2)) : 0,
           //headB = parseInt(heading([pos1[0]+err,pos1[1]],[pos2[0],pos2[1]-err])),
-          head0,head1
+          //head0,head1
+          berr = bearingwc(pos1, pos2)
       ;
-
 
       //if (head>=180) {
         //head0=headA;
@@ -284,10 +325,20 @@ COPYRIGHT 2017 - LOREN HOWARD
           ms = 'Too Close</strong>';
         }
       }
+
+      var bs;
+      if (berr) {
+        berr[0] = Math.round(berr[0]) % 360;
+        berr[1] = Math.round(berr[1]) % 360;
+
+        bs = head + ' degrees</strong> <span>' + minMaxStr(berr[0],berr[1]) + '</span>';
+      } else {
+        bs = head + ' degrees</strong> (high error)';
+      }
       
       var line1 = 'Distance: <strong>' + distStr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
           line2 = 'Milliradian: <strong>' + ms,
-          line3 = 'Bearing: <strong>' + head + ' degrees</strong>'// <span>' + minMaxStr(head0,head1) + '</span>'
+          line3 = 'Bearing: <strong>' + bs
       ;
 
       oel.innerHTML = line1 + '<br>' + line2 + '<br>' + line3;
