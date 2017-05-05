@@ -59,7 +59,7 @@ COPYRIGHT 2017 - LOREN HOWARD
       DR = 180/Math.PI,
 
       EX1 = 'A1-KP1-1',
-      EX2 = 'A1K11',
+      EX2 = 'A111',
       EX3 = 'A1 11',
       EX4 = 'A1 1 1'
   ;
