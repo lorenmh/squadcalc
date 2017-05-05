@@ -221,7 +221,7 @@ COPYRIGHT 2017 - LOREN HOWARD
             .replace(REPLACE_RE, '')
             .split('')
             .map(function(ks){ return parseInt(ks); })
-            .map(function(k){ return [KP_MAP[k][0], KP_MAP[k][1]]; })
+            .map(function(k){ return [KP_MAP[k-1][0], KP_MAP[k-1][1]]; })
             .map(function(k,i) {
               var e = Math.pow(1/3,i+1);
               return [k[0]*e, k[1]*e];
