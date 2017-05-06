@@ -16,10 +16,7 @@ COPYRIGHT 2017 - LOREN HOWARD
         [0,0],[1,0],[2,0],
       ],
 
-      RE_1 = /^([A-Za-z])([1-9])((?:\-(?:[Kk][Pp]?)?[1-9])*)(?:\-(?:[Kk][Pp]?)?)?$/,
-      RE_2 = /^([A-Za-z])([1-9])((?:(?:[Kk][Pp]?)?[1-9])*)(?:[Kk][Pp]?)?$/,
-      RE_3 = /^([A-Za-z])([1-9])\s+((?:[1-9])*)(?:\s+)?$/,
-      RE_4 = /^([A-Za-z])([1-9])((?:\s+[1-9])*)(?:\s+)?$/,
+      INPUT_RE = /^([a-z])([12][0-9](?=(?:[k\s-]))|[1-9])((?:(?:\s+|-)?(?:kp?)?[1-9])*)(?:\s|-)?(?:kp?)?$/i,
 
       REPLACE_RE = /[^1-9]/g,
 
@@ -58,12 +55,7 @@ COPYRIGHT 2017 - LOREN HOWARD
         [1250, 800]
       ],
 
-      DR = 180/Math.PI,
-
-      EX1 = 'A1-KP1-1',
-      EX2 = 'A111',
-      EX3 = 'A1 11',
-      EX4 = 'A1 1 1'
+      DR = 180/Math.PI
   ;
 
   var interpolator = function(d) {
@@ -108,6 +100,26 @@ COPYRIGHT 2017 - LOREN HOWARD
       })
     );
   };
+
+  function pretty(values) {
+    var c = values[0].toUpperCase(),
+        r = values[1],
+        kp1 = values[2],
+        kps = values.slice(3),
+        grid = c + r,
+        kp1str
+    ;
+
+
+    if (!kp1) { return grid; }
+
+    kp1str = grid + '-KP' + kp1;
+
+    if (!kps.length) { return kp1str; }
+
+    return kp1str + '-' + kps.join('-');
+  }
+
 
   var heading = function(p1,p2) {
     var x1 = p1[0],
@@ -171,13 +183,13 @@ COPYRIGHT 2017 - LOREN HOWARD
         Math.hypot(p2[2],p2[2]) > Math.hypot(dx,dy)) { return null; }
 
     var c;
-    if (dx===0 && dy<0)       { c=1; w = [[br(p1), bl(p2)], [bl(p1), br(p2)]]; }
+    if (dx===0 && dy<0)       { c=1; w = [[tr(p1), bl(p2)], [tl(p1), br(p2)]]; }
     else if (dx>0 && dy<0)    { c=2; w = [[br(p1), tl(p2)], [tl(p1), br(p2)]]; }
-    else if (dx>0 && dy===0)  { c=3; w = [[bl(p1), tl(p2)], [tl(p1), bl(p2)]]; }
+    else if (dx>0 && dy===0)  { c=3; w = [[br(p1), tl(p2)], [tr(p1), bl(p2)]]; }
     else if (dx>0 && dy>0)    { c=4; w = [[bl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
-    else if (dx===0 && dy>0)  { c=5; w = [[tl(p1), tr(p2)], [tr(p1), tl(p2)]]; }
+    else if (dx===0 && dy>0)  { c=5; w = [[bl(p1), tr(p2)], [br(p1), tl(p2)]]; }
     else if (dx<0 && dy>0)    { c=6; w = [[tl(p1), br(p2)], [br(p1), tl(p2)]]; }
-    else if (dx<0 && dy===0)  { c=7; w = [[tr(p1), br(p2)], [br(p1), tr(p2)]]; }
+    else if (dx<0 && dy===0)  { c=7; w = [[tl(p1), br(p2)], [bl(p1), tr(p2)]]; }
     else                      { c=8; w = [[tr(p1), bl(p2)], [bl(p1), tr(p2)]]; }
     //console.log(dx,dy, c, ''+w);
 
@@ -189,37 +201,27 @@ COPYRIGHT 2017 - LOREN HOWARD
     return str.match(re).slice(1);
    };
 
-  function pos(str) {
-    var re;
-
-    switch(strType) {
-      case 1:
-        re = RE_1;
-        break;
-      case 2:
-        re = RE_2;
-        break;
-      case 3:
-        re = RE_3;
-        break;
-       case 4:
-        re = RE_4;
-        break;
-    }
-    
-    var pstrs = strs(str, re),
+  function pvalues(str) {
+    var pstrs = strs(str, INPUT_RE),
         gxs = pstrs[0],
         gys = pstrs[1],
-        kps = pstrs[2]
+        kps = pstrs[2],
+        kp = kps.replace(REPLACE_RE,'').split('')
+    ;
+
+    return [gxs, gys].concat(kp);
+  }
+
+  function pos(values) {
+    var gxs = values[0],
+        gys = values[1],
+        kps = values.slice(2)
     ;
     
-    console.log(kps);
     var gx = parseInt(gxs,36)-10,
         gy = parseInt(gys)-1,
-        kp = !kps ? [] : (
+        kp = (
           kps
-            .replace(REPLACE_RE, '')
-            .split('')
             .map(function(ks){ return parseInt(ks); })
             .map(function(k){ return [KP_MAP[k-1][0], KP_MAP[k-1][1]]; })
             .map(function(k,i) {
@@ -228,8 +230,6 @@ COPYRIGHT 2017 - LOREN HOWARD
             })
         )
     ;
-
-    console.log(kp);
 
     var kpxa, kpya, kpx, kpy;
     if (kp.length) {
@@ -270,8 +270,9 @@ COPYRIGHT 2017 - LOREN HOWARD
 
   var i1el = document.getElementById('i1'),
       i2el = document.getElementById('i2'),
-      sel = document.getElementById('type'),
-      oel = document.getElementById('output')
+      oel = document.getElementById('output'),
+      p1el = document.getElementById('p1'),
+      p2el = document.getElementById('p2')
   ;
 
   var minMaxStr = function(m0,m1) {
@@ -283,18 +284,45 @@ COPYRIGHT 2017 - LOREN HOWARD
   };
 
   var update = function() {
+    var pretty1, pretty2;
+
     try {
-      var v1 = i1el.value,
-          v2 = i2el.value
+      var iv1 = i1el.value,
+          iv2 = i2el.value
       ;
      
-      var pos1 = pos(v1),
-          pos2 = pos(v2)
+      var v1, v2, pos1, pos2
       ;
 
-      var distErr = dist(pos1,pos2),
-          distance = distErr[0],
-          err = distErr[1],
+      var pos1e = false,
+          pos2e = false
+      ;
+      try {
+        v1 = pvalues(iv1);
+        pos1 = pos(v1);
+        pretty1 = pretty(v1);
+      } catch(e) {
+        pos1e = true;
+      }
+
+      try {
+        v2 = pvalues(iv2);
+        pos2 = pos(v2);
+        pretty2 = pretty(v2);
+      } catch(e) {
+        pos2e = true;
+      }
+
+      console.log(pos1e, pos2e);
+
+      if (pos1e || pos2e) { throw new Error(); }
+
+      var disterr = dist(pos1,pos2),
+
+          distance = disterr[0],
+
+          err = disterr[1],
+
           distStr = distance.toFixed(PRECISION),
           dist0 = distance-err,
           dist1 = distance+err,
@@ -305,20 +333,9 @@ COPYRIGHT 2017 - LOREN HOWARD
           milrad = interpolator(distance),
           milrad1 = interpolator(dist0),
 
-          //headA = parseInt(heading([pos1[0],pos1[1]-err],[pos2[0]+err,pos2[1]])),
           head = distance ? parseInt(heading(pos1, pos2)) : 0,
-          //headB = parseInt(heading([pos1[0]+err,pos1[1]],[pos2[0],pos2[1]-err])),
-          //head0,head1
           berr = bearingwc(pos1, pos2)
       ;
-
-      //if (head>=180) {
-        //head0=headA;
-        //head1=headB;
-      //} else {
-      //  head0=headB;
-      //  head1=headA;
-      //}
 
       var ms;
       if (milrad !== MIN_ATOM && milrad !== MAX_ATOM) {
@@ -347,8 +364,12 @@ COPYRIGHT 2017 - LOREN HOWARD
       ;
 
       oel.innerHTML = line1 + '<br>' + line2 + '<br>' + line3;
+      p1el.innerHTML = '<pre>' + pretty1 + '</pre>';
+      p2el.innerHTML = '<pre>' + pretty2 + '</pre>';
     } catch(_) {
       oel.innerHTML = '&nbsp;<br>&nbsp;<br>&nbsp;';
+      p1el.innerHTML = pretty1 ? '<pre>' + pretty1 + '</pre>' : '';
+      p2el.innerHTML = pretty2 ? '<pre>' + pretty2 + '</pre>' : '';
     }
   };
 
@@ -356,37 +377,7 @@ COPYRIGHT 2017 - LOREN HOWARD
     update();
   };
 
-  var updateph = function() {
-    var ph;
-    
-    switch(strType) {
-      case 1:
-        ph = EX1;
-        break;
-      case 2:
-        ph = EX2;
-        break;
-      case 3:
-        ph = EX3;
-        break;
-       case 4:
-        ph = EX4;
-        break;
-    }
-    
-    i1el.setAttribute('placeholder', 'Position 1 (ex: \'' + ph + '\')');
-    i2el.setAttribute('placeholder', 'Position 2 (ex: \'' + ph + '\')');
-  };
-
-  var slistener = function(e) {
-    strType = parseInt(sel.value);
-    updateph();
-    update();
-  };
-
   i1el.addEventListener('input', ilistener);
   i2el.addEventListener('input', ilistener);
-  sel.addEventListener('change', slistener);
 
-  updateph();
 })();
