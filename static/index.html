@@ -17,26 +17,21 @@
 <body>
 	<div id="wrap">
 			<h1 id="title">Squad Game Calculator</h1>
-			<select id="type">
-				<option value="1">Long Format - 'A1-KP1-1'</option>
-				<option value="2" selected>Short Format 1 - 'A1K11' or 'A111'</option>
-				<option value="3">Short Format 2 - 'A1 11'</option>
-				<option value="4">Short Format 3 - 'A1 1 1'</option>
-			</select><!--
-	 --><input type="text" id="i1"/><!--
-	 --><input type="text" id="i2"/>
+	    <input type="text" id="i1" placeholder="Position 1: (ex: A11 11)"/><!--
+	 --><input type="text" id="i2" placeholder="Position 2: (ex: A11 11)"/>
+   <div id="pretty">
+     <div id="p1"></div><div id="p2"></div>
+    </div>
    <h3>Calculation:</h3>
    <div id="output"><strong>&nbsp;<br>&nbsp;<br>&nbsp;</strong></div>
 	<h3>About:</h3>
 	<ul>
-    <li><strong>Using the text inputs enter the coordinates of two points given on the Squad map</strong>. This calculator will output the <strong>Distance</strong>, <strong>Milliradians</strong>, and <strong>Bearing</strong>. The default format for the coordinates is 'Short Format 1' which means if you see <pre>A3-KP2-1</pre> in the map, you would input <pre>A321</pre> or <pre>A3K11</pre>. You can change the input format by using the selector.</li>
+    <li><strong>Using the text inputs enter the coordinates of two points given on the Squad map</strong>. This calculator will output the <strong>Distance</strong>, <strong>Milliradians</strong>, and <strong>Bearing</strong>. You can input the values in many different formats. For instance, you can input the same values given on the Squad map (ex: <pre>A1-KP1-1</pre>), or you can omit the dashes and the <pre>KP</pre> (ex: <pre>A111</pre>). If the grid's number has two digits (ex: <pre>A11-KP1-1</pre>) then you must put a space, a <pre>K</pre> or <pre>KP</pre>, or a dash in between the grid and the keypad values so the parser can figure this out: given <pre>A11-KP1-1</pre> input <pre>A11 11</pre> or <pre>A11K11</pre> or <pre>A11-11</pre>.</li>
     <li>To minimize the error <strong>enter all of the data given in the Squad map</strong>. You can estimate further 'keypad subdivisions' to minimize the error. For example, given the Squad coordinates <pre>C2-KP3-6</pre>, if the target is in keypad <pre>5</pre> of that grid, then you should enter <pre>C2365</pre> which will have less error than <pre>C236</pre>. You can subdivide the grid as many times as you want this way. I have heard this referred to as 'infinite subsetting'</li>
       <li><em>The min/max values are calculated from the error</em>. The error is based on the number of keypad values you input. If you input all of the data given in the Squad map then the maximum error will be a distance of <em>47.1 meters</em> in the worst case, which will affect the millradian and bearing min/max values. <em>If you add your own estimated keypad values then the error can go down to within a couple of meters</em>.</li>
 		<li>The error is a '<em>worst case</em>' approximation. To minimize error, center your mouse so that it is at the center of a keypad (in other words, don't put your mouse on the gridlines as this will increase the error if you accidentally cross over into another grid).</li>
     <li>This site is mobile friendly and the distance is calculated using JavaScript entirely in your browser. The best way to use this calculator is with your mobile phone as you play the game.</li>
 		<li>Case insensitive: <pre>A5-KP2-3</pre> is the same as <pre>a5-kp2-3</pre>.</li>
-		<li>There are 3 short formats to make it so you don't have to write so much.</li>
-    <li>With the Long Format and Short Format 1, the <pre>KP</pre> and <pre>K</pre> is <em>optional</em>: <pre>A5-2-3</pre> is the same as <pre>A5-K2-3</pre> which is the same as <pre>A5-KP2-3</pre>. With Short Format 1, <pre>A432</pre> is the same as <pre>A4K32</pre> which is the same as <pre>A4KP32</pre>.</li>
       <li><img src="/static/position.svg">The distance, bearing and milliradians are calculated from the distance between the top-left-corners of the two grids. This may affect how you want to dial in your shots. To illustrate this, see the image to the right: Your target could be anywhere within the red square, your mortar could be anywhere in the green square. Take the min/max values into account to adjust your aim.</li>
       <li>With the min/max values for bearing, the min value is the 'left-most possible bearing', and the max value is the 'right-most possible bearing'. Again, the error affects this. These values might look a little off, but it takes into account the maximum error given that the reference point is in the top left and you or the target can be anywhere within a grid. The min and max values for bearing might not be 'symmetrical', believe me though it should be correct (spent a lot of time thinking about this problem).</li>
 		<li>Made by Squad player <pre>Loff</pre>.</li>
@@ -44,10 +39,13 @@
 	</ul>
   <h3>Changelog:</h3>
   <ul>
-    <li>Short Format 1 now allows an even shorter input string, <pre>A1-KP1-1</pre> can now be inputed as <pre>A111</pre>.</li>
-      <li>The millirad function has been changed to a linear interpolating function instead of a 7th order polynomial.</li>
-      <li>Added min/max values to the bearing.</li>
+  <li>The input format was changed so that you can pretty much put in anything.</li>
+  <li>The calculator will now show you which points it is computing the distance for.</li>
+  <li>Fixed a bug where only 1-9 could be inputted for the grid's Y position. Now you can enter a grid like <pre>A11-KP2-1</pre>.
       <li>Added 'infinite subsetting', ie, the ability to infinitely subdivide the grid. For example, if the Squad map reads <pre>C4-KP1-3</pre>, you can add to this, for example by entering <pre>C4-KP1-3-5-2-1</pre>. The normal format rules apply.
+      <li>Added min/max values to the bearing.</li>
+      <li>The millirad function has been changed to a linear interpolating function instead of a 7th order polynomial.</li>
+    <li>Short Format 1 now allows an even shorter input string, <pre>A1-KP1-1</pre> can now be inputed as <pre>A111</pre>.</li>
   </ul>
   <footer>&copy; 2017 - <a href="http://plutonium.io">plutonium.io</a></footer>
 	</div>

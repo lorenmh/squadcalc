@@ -2,7 +2,7 @@
 COPYRIGHT 2017 - LOREN HOWARD
 */
 
-(function() {
+//(function() {
   var strType = 2;
 
   var GRID_SIZE = 300,
@@ -171,16 +171,43 @@ COPYRIGHT 2017 - LOREN HOWARD
     return [p[0], p[1]+p[2]];
   };
 
+  var pcontains = function(tl,br,p) {
+    if (tl[0]<p[0] && br[0]>p[0] && tl[1]<p[1] && br[1]>p[1]) { return true; }
+    return false;
+  };
+
+  var contains = function(tl1,br1, tl2,br2) {
+    return (
+      // tl
+      pcontains(tl1,br1, tl2) ||
+      // tr
+      pcontains(tl1,br1, [br2[0],tl2[1]]) ||
+      // br
+      pcontains(tl1,br1, br2) ||
+      // bl
+      pcontains(tl1,br1, [tl2[0],br2[1]])
+    );
+  };
 
   var bearingwc = function(p1,p2) {
-    var dx = p2[0]-p1[0],
-        dy = p2[1]-p1[1],
+    var x1 = p1[0],
+        y1 = p1[1],
+        x2 = p2[0],
+        y2 = p2[1],
+        br1 = [x1+p1[2], y1+p1[2]],
+        br2 = [x2+p2[2], y2+p2[2]],
+    
+        dx = x2-x1,
+        dy = y2-y1,
         w // worst
     ;
 
-    // in this case the err > the dx, which means p1 is within p2, vice versa
-    if (Math.hypot(p1[2],p1[2]) > Math.hypot(dx,dy) ||
-        Math.hypot(p2[2],p2[2]) > Math.hypot(dx,dy)) { return null; }
+    if (
+        (x1===x2 && y1===y2) ||
+        contains(p1,br1, p2,br2) ||
+        contains(p2,br2, p1,br1)) {
+      return null;
+    }
 
     var c;
     if (dx===0 && dy<0)       { c=1; w = [[tr(p1), bl(p2)], [tl(p1), br(p2)]]; }
@@ -380,4 +407,4 @@ COPYRIGHT 2017 - LOREN HOWARD
   i1el.addEventListener('input', ilistener);
   i2el.addEventListener('input', ilistener);
 
-})();
+//})();
