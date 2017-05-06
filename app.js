@@ -2,7 +2,7 @@
 COPYRIGHT 2017 - LOREN HOWARD
 */
 
-//(function() {
+(function() {
   var strType = 2;
 
   var GRID_SIZE = 300,
@@ -407,4 +407,4 @@ COPYRIGHT 2017 - LOREN HOWARD
   i1el.addEventListener('input', ilistener);
   i2el.addEventListener('input', ilistener);
 
-//})();
+})();
