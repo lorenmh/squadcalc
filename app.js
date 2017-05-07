@@ -223,6 +223,51 @@ COPYRIGHT 2017 - LOREN HOWARD
     return [heading(w[0][0], w[0][1]), heading(w[1][0], w[1][1])];
   };
 
+  function dist(pos1, pos2) {
+    var x1 = pos1[0],
+        y1 = pos1[1],
+        e1 = pos1[2],
+        x2 = pos2[0],
+        y2 = pos2[1],
+        e2 = pos2[2]
+    ;
+    
+    return Math.hypot(x2-x1, y2-y1);
+  }
+
+  var distanceminmax = function(p1,p2) {
+    var x1 = p1[0],
+        y1 = p1[1],
+        x2 = p2[0],
+        y2 = p2[1],
+        br1 = [x1+p1[2], y1+p1[2]],
+        br2 = [x2+p2[2], y2+p2[2]],
+    
+        dx = x2-x1,
+        dy = y2-y1,
+        w // worst
+    ;
+
+    if (
+        (x1===x2 && y1===y2) ||
+        contains(p1,br1, p2,br2) ||
+        contains(p2,br2, p1,br1)) {
+      return null;
+    }
+
+    var c;
+    if (dx===0 && dy<0)       { c=1; w = [[tl(p1), bl(p2)], [bl(p1), tr(p2)]]; }
+    else if (dx>0 && dy<0)    { c=2; w = [[tr(p1), bl(p2)], [bl(p1), tr(p2)]]; }
+    else if (dx>0 && dy===0)  { c=3; w = [[tr(p1), tl(p2)], [bl(p1), tr(p2)]]; }
+    else if (dx>0 && dy>0)    { c=4; w = [[bl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
+    else if (dx===0 && dy>0)  { c=5; w = [[bl(p1), tl(p2)], [tl(p1), br(p2)]]; }
+    else if (dx<0 && dy>0)    { c=6; w = [[bl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
+    else if (dx<0 && dy===0)  { c=7; w = [[tl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
+    else                      { c=8; w = [[tl(p1), br(p2)], [br(p1), tl(p2)]]; }
+    //console.log(dx,dy, c, ''+w);
+
+    return [dist(w[0][0], w[0][1]), dist(w[1][0], w[1][1])];
+  };
 
   var strs = function(str, re) {
     return str.match(re).slice(1);
@@ -280,21 +325,6 @@ COPYRIGHT 2017 - LOREN HOWARD
     return [px*GRID_SIZE, py*GRID_SIZE, err*GRID_SIZE];
   }
 
-  function dist(pos1, pos2) {
-    var x1 = pos1[0],
-        y1 = pos1[1],
-        e1 = pos1[2],
-        x2 = pos2[0],
-        y2 = pos2[1],
-        e2 = pos2[2]
-    ;
-    
-    return [
-      Math.hypot(x2-x1, y2-y1),
-      Math.hypot(e1, e2)
-    ];
-  }
-
   var i1el = document.getElementById('i1'),
       i2el = document.getElementById('i2'),
       oel = document.getElementById('output'),
@@ -344,23 +374,23 @@ COPYRIGHT 2017 - LOREN HOWARD
 
       if (pos1e || pos2e) { throw new Error(); }
 
-      var disterr = dist(pos1,pos2),
+      var c1 = [pos1[0] + (pos1[2]/2), pos1[1] + (pos1[2]/2)],
+          c2 = [pos2[0] + (pos2[2]/2), pos2[1] + (pos2[2]/2)]
+      ;
 
-          distance = disterr[0],
-
-          err = disterr[1],
-
-          distStr = distance.toFixed(PRECISION),
-          dist0 = distance-err,
-          dist1 = distance+err,
+      var cdistance = dist(c1,c2),
+          derr = distanceminmax(pos1, pos2),
+          diststr = cdistance.toFixed(PRECISION),
+          dist0 = derr[0],
+          dist1 = derr[1],
           dist0s = dist0.toFixed(PRECISION),
           dist1s = dist1.toFixed(PRECISION),
 
           milrad0 = interpolator(dist1),
-          milrad = interpolator(distance),
+          milrad = interpolator(cdistance),
           milrad1 = interpolator(dist0),
 
-          head = distance ? parseInt(heading(pos1, pos2)) : 0,
+          head = cdistance ? parseInt(heading(pos1, pos2)) : 0,
           berr = bearingwc(pos1, pos2)
       ;
 
@@ -385,7 +415,7 @@ COPYRIGHT 2017 - LOREN HOWARD
         bs = head + ' degrees</strong> <span>(high error)</span>';
       }
       
-      var line1 = 'Distance: <strong>' + distStr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
+      var line1 = 'Distance: <strong>' + diststr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
           line2 = 'Milliradian: <strong>' + ms,
           line3 = 'Bearing: <strong>' + bs
       ;

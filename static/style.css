@@ -2,12 +2,20 @@
   box-sizing: border-box;
 }
 
-pre {
-  display: inline;
+code {
   background-color: rgb(240,240,240);
   padding: 1px 5px;
   border-radius: 2px;
 }
+
+p {
+  margin-top:0;
+}
+
+p img {
+      margin: auto;
+          display: block;
+        max-width:100%;}
 
 body {
   font-family: Helvetica, Verdana, sans-serif;
