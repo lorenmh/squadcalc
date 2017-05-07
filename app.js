@@ -259,7 +259,7 @@ COPYRIGHT 2017 - LOREN HOWARD
     if (dx===0 && dy<0)       { c=1; w = [[tl(p1), bl(p2)], [bl(p1), tr(p2)]]; }
     else if (dx>0 && dy<0)    { c=2; w = [[tr(p1), bl(p2)], [bl(p1), tr(p2)]]; }
     else if (dx>0 && dy===0)  { c=3; w = [[tr(p1), tl(p2)], [bl(p1), tr(p2)]]; }
-    else if (dx>0 && dy>0)    { c=4; w = [[bl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
+    else if (dx>0 && dy>0)    { c=4; w = [[br(p1), tl(p2)], [tl(p1), br(p2)]]; }
     else if (dx===0 && dy>0)  { c=5; w = [[bl(p1), tl(p2)], [tl(p1), br(p2)]]; }
     else if (dx<0 && dy>0)    { c=6; w = [[bl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
     else if (dx<0 && dy===0)  { c=7; w = [[tl(p1), tr(p2)], [tr(p1), bl(p2)]]; }
@@ -381,28 +381,37 @@ COPYRIGHT 2017 - LOREN HOWARD
       var cdistance = dist(c1,c2),
           derr = distanceminmax(pos1, pos2),
           diststr = cdistance.toFixed(PRECISION),
-          dist0 = derr[0],
-          dist1 = derr[1],
-          dist0s = dist0.toFixed(PRECISION),
-          dist1s = dist1.toFixed(PRECISION),
 
-          milrad0 = interpolator(dist1),
+          //milrad0 = interpolator(dist1),
           milrad = interpolator(cdistance),
-          milrad1 = interpolator(dist0),
+          //milrad1 = interpolator(dist0),
 
           head = cdistance ? parseInt(heading(pos1, pos2)) : 0,
           berr = bearingwc(pos1, pos2)
       ;
 
-      var ms;
-      if (milrad !== MIN_ATOM && milrad !== MAX_ATOM) {
-        ms = milrad + '</strong> <span>' + minMaxStr(milrad0,milrad1) + '</span>';
+      var ds, d0s, d1s;
+      if (derr) {
+        d0s = derr[0].toFixed(PRECISION);
+        d1s = derr[1].toFixed(PRECISION);
+        ds = diststr + 'm</strong> <span>' + minMaxStr(d0s,d1s) + '</span>';
       } else {
+        ds = head + ' m</strong> <span>(high error)</span>';
+      }
+
+      var ms, milrad0, milrad1;
+      if (milrad !== MIN_ATOM && milrad !== MAX_ATOM && derr) {
+        milrad0 = interpolator(derr[1]);
+        milrad1 = interpolator(derr[0]);
+        ms = milrad + '</strong> <span>' + minMaxStr(milrad0,milrad1) + '</span>';
+      } else if (milrad === MIN_ATOM || milrad === MAX_ATOM) {
         if (milrad === MAX_ATOM) {
           ms = 'Out of Range</strong>';
         } else {
           ms = 'Too Close</strong>';
         }
+      } else {
+        ms = milrad + '</strong> <span>(high error)</span>';
       }
 
       var bs;
@@ -415,18 +424,18 @@ COPYRIGHT 2017 - LOREN HOWARD
         bs = head + ' degrees</strong> <span>(high error)</span>';
       }
       
-      var line1 = 'Distance: <strong>' + diststr + 'm</strong> <span>' + minMaxStr(dist0s,dist1s) + '</span>',
+      var line1 = 'Distance: <strong>' + ds,
           line2 = 'Milliradian: <strong>' + ms,
           line3 = 'Bearing: <strong>' + bs
       ;
 
       oel.innerHTML = line1 + '<br>' + line2 + '<br>' + line3;
-      p1el.innerHTML = '<pre>' + pretty1 + '</pre>';
-      p2el.innerHTML = '<pre>' + pretty2 + '</pre>';
+      p1el.innerHTML = '<code>' + pretty1 + '</code>';
+      p2el.innerHTML = '<code>' + pretty2 + '</code>';
     } catch(_) {
       oel.innerHTML = '&nbsp;<br>&nbsp;<br>&nbsp;';
-      p1el.innerHTML = pretty1 ? '<pre>' + pretty1 + '</pre>' : '';
-      p2el.innerHTML = pretty2 ? '<pre>' + pretty2 + '</pre>' : '';
+      p1el.innerHTML = pretty1 ? '<code>' + pretty1 + '</code>' : '';
+      p2el.innerHTML = pretty2 ? '<code>' + pretty2 + '</code>' : '';
     }
   };
 
